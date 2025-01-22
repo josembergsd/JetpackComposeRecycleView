@@ -18,6 +18,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
@@ -42,10 +45,64 @@ class MainActivity : ComponentActivity() {
             JetpackComposeRecycleViewTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     //SimpleRecycleView(innerPadding)
-                    SuperHeroView(innerPadding)
+                    //SuperHeroView(innerPadding)
+                    //SuperHeroGridView(innerPadding)
+                    SuperHeroWithSpecialControlView(innerPadding)
                 }
             }
         }
+    }
+}
+
+@Composable
+fun SuperHeroWithSpecialControlView(innerPadding: PaddingValues) {
+    val context = LocalContext.current
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.padding(innerPadding),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        content = {
+            items(getSuperHeroes()) { superhero ->
+                ItemHero(superhero = superhero) {
+                    val toastText = it.superheroName
+                    Log.d("Toast", "Item SuperHoroView clicked")
+                    Toast.makeText(context, toastText, Toast.LENGTH_LONG).show()
+                }
+            }
+        },
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+    )
+    LazyColumn(
+        modifier = Modifier.padding(innerPadding),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+
+    }
+}
+
+@Composable
+fun SuperHeroGridView(innerPadding: PaddingValues) {
+    val context = LocalContext.current
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.padding(innerPadding),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        content = {
+            items(getSuperHeroes()) { superhero ->
+                ItemHero(superhero = superhero) {
+                    val toastText = it.superheroName
+                    Log.d("Toast", "Item SuperHoroView clicked")
+                    Toast.makeText(context, toastText, Toast.LENGTH_LONG).show()
+                }
+            }
+        },
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+    )
+    LazyColumn(
+        modifier = Modifier.padding(innerPadding),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+
     }
 }
 
@@ -57,29 +114,72 @@ fun SuperHeroView(innerPadding: PaddingValues) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(getSuperHeroes()) { superhero ->
-            ItemHero(superhero = superhero, context = context) {
+            ItemHero(superhero = superhero) {
                 val toastText = it.superheroName
-                if (toastText.isNotEmpty()) {
-                    Log.d("Toast", "Toast triggered")
-                    Toast.makeText(context, toastText, Toast.LENGTH_LONG).show()
-                } else {
-                    Log.e("Toast", "Toast text is empty")
-                }
+                Log.d("Toast", "Item SuperHoroView clicked")
+                Toast.makeText(context, toastText, Toast.LENGTH_LONG).show()
             }
         }
     }
 }
 
 @Composable
-fun ItemHero(superhero: SuperHero, context: Context, onItemSelected: (SuperHero) -> Unit) {
+fun ItemHero(superhero: SuperHero, onItemSelected: (SuperHero) -> Unit) {
+    Card(
+        border = BorderStroke(2.dp, Color.Red),
+        modifier = Modifier
+            .width(200.dp)
+            .clickable { onItemSelected(superhero) }) {
+        Column {
+            Image(
+                painter = painterResource(id = superhero.photo),
+                contentDescription = "SuperHero Avatar",
+                modifier = Modifier.fillMaxWidth(),
+                contentScale = ContentScale.Crop
+            )
+            Text(
+                text = superhero.superheroName,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+            Text(
+                text = superhero.realName,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                fontSize = 12.sp
+            )
+            Text(
+                text = superhero.publicher,
+                fontSize = 10.sp,
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(8.dp)
+            )
+        }
+    }
+}
+
+fun getSuperHeroes(): List<SuperHero> {
+    return listOf(
+        SuperHero("Spiderman", "Peter Parker", "Marvel", R.drawable.spiderman),
+        SuperHero("Wolverine", "James Howlett", "Marvel", R.drawable.logan),
+        SuperHero("Batman", "Bruce Wayne", "DC", R.drawable.batman),
+        SuperHero("Thor", "Thor Odison", "Marvel", R.drawable.thor),
+        SuperHero("Flash", "Jay Garrick", "DC", R.drawable.flash),
+        SuperHero("Green Lantern", "Alan Scott", "DC", R.drawable.green_lantern),
+        SuperHero("Wonder Woman", "Princess Diana", "DC", R.drawable.wonder_woman)
+    )
+}
+
+/*
+@Composable
+fun ItemHero(superhero: SuperHero, onItemSelected: (SuperHero) -> Unit) {
     Card(
         border = BorderStroke(2.dp, Color.Red),
         modifier = Modifier
             .width(200.dp)
             .clickable {
-                Log.d("Click", "Item clicked")
+                Log.d("Click", "ItemHero clicked")
                 onItemSelected(superhero)
-            }
+            }.padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)
     ) {
         Column {
             Image(
@@ -119,6 +219,7 @@ fun getSuperHeroes(): List<SuperHero> {
         SuperHero("Wonder Woman", "Princess Diana", "DC", R.drawable.wonder_woman),
     )
 }
+*/
 
 /*
 @Composable

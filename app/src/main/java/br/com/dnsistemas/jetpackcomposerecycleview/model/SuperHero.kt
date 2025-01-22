@@ -3,7 +3,7 @@ package br.com.dnsistemas.jetpackcomposerecycleview.model
 import androidx.annotation.DrawableRes
 
 /*
-Modelo de dados
+Modelo de dados =  record java
  */
 
 data class SuperHero (
