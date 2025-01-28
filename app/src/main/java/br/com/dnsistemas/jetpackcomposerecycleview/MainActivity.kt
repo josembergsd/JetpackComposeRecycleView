@@ -1,6 +1,7 @@
 package br.com.dnsistemas.jetpackcomposerecycleview
 
 import android.content.Context
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -22,10 +23,16 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.dnsistemas.jetpackcomposerecycleview.model.SuperHero
 import br.com.dnsistemas.jetpackcomposerecycleview.ui.theme.JetpackComposeRecycleViewTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,28 +63,55 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
+fun SuperHeroStickyView() {
+    val context = LocalContext.current
+    val superhero = getSuperHeroes()
+    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        items(getSuperHeroes()) { superhero ->
+            ItemHero(superhero = superhero) {
+                Toast.makeText(context, it.realName, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+}
+
+@Composable
 fun SuperHeroWithSpecialControlView(innerPadding: PaddingValues) {
     val context = LocalContext.current
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier.padding(innerPadding),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        content = {
+    val rvState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    Column(modifier = Modifier.padding(innerPadding)) {
+        LazyColumn(
+            state = rvState, verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.weight(1f)
+        ) {
             items(getSuperHeroes()) { superhero ->
-                ItemHero(superhero = superhero) {
-                    val toastText = it.superheroName
-                    Log.d("Toast", "Item SuperHoroView clicked")
-                    Toast.makeText(context, toastText, Toast.LENGTH_LONG).show()
-                }
+                ItemHero(superhero = superhero)
+                { Toast.makeText(context, it.realName, Toast.LENGTH_LONG).show() }
             }
-        },
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-    )
-    LazyColumn(
-        modifier = Modifier.padding(innerPadding),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
+        }
 
+        val showbutton by remember {
+            derivedStateOf { //Exibe o botão quando o primeiro item da lista estiver fora da tela
+                rvState.firstVisibleItemIndex > 0
+            }
+        }
+
+        rvState.firstVisibleItemScrollOffset
+
+        if (showbutton) {
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        rvState.animateScrollToItem(0)}
+                    },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(16.dp)
+            ) {
+                Text("Topo")
+            }
+        }
     }
 }
 
@@ -128,7 +163,7 @@ fun ItemHero(superhero: SuperHero, onItemSelected: (SuperHero) -> Unit) {
     Card(
         border = BorderStroke(2.dp, Color.Red),
         modifier = Modifier
-            .width(200.dp)
+            // .width(200.dp)
             .clickable { onItemSelected(superhero) }) {
         Column {
             Image(
