@@ -1,7 +1,6 @@
 package br.com.dnsistemas.jetpackcomposerecycleview
 
-import android.content.Context
-import android.location.Location
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -9,28 +8,43 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -51,25 +65,80 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             JetpackComposeRecycleViewTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                //val scaffoldState = rememberScaffoldState()
+                val snackbarHostState = remember { SnackbarHostState() }
+                val coroutineScope = rememberCoroutineScope()
+                Scaffold(
+                    topBar = {
+                        MyTopAppBar{ message ->
+                            coroutineScope.launch {
+                                Log.i("TAG", "onCreate: Pressionado")
+                                snackbarHostState.showSnackbar(message)
+                            } } },
+                    modifier = Modifier.fillMaxSize()) { innerPadding ->
                     //SimpleRecycleView(innerPadding)
                     //SuperHeroView(innerPadding)
                     //SuperHeroGridView(innerPadding)
-                    SuperHeroWithSpecialControlView(innerPadding)
+                    //SuperHeroWithSpecialControlView(innerPadding)
+                    SuperHeroStickyView(innerPadding)
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SuperHeroStickyView() {
+fun MyTopAppBar(onClickIcon: (String) -> Unit) {
+    TopAppBar(
+        title = { Text("TopAppBar")},
+        Modifier.background(Color.Blue),
+        colors = TopAppBarColors(
+            containerColor = Color.Red,
+            titleContentColor = Color.White,
+            scrolledContainerColor = Color.Gray,
+            navigationIconContentColor = Color.White,
+            actionIconContentColor = Color.White
+            ),
+        navigationIcon = {
+                IconButton(onClick = { onClickIcon("Retornar") }){
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            }
+        },
+        actions = {
+            IconButton(onClick = {onClickIcon("Buscar")}){
+                Icon(imageVector = Icons.Filled.Search, contentDescription = "Search")
+            }
+            IconButton(onClick = {onClickIcon("Perigo")}){
+                Icon(imageVector = Icons.Filled.Close, contentDescription = "dangerous")
+            }
+        }
+    )
+}
+
+@Composable
+fun MySnackBar() {
+
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun SuperHeroStickyView(innerPadding: PaddingValues) {
     val context = LocalContext.current
-    val superhero = getSuperHeroes()
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(getSuperHeroes()) { superhero ->
-            ItemHero(superhero = superhero) {
-                Toast.makeText(context, it.realName, Toast.LENGTH_LONG).show()
+    val superhero: Map<String, List<SuperHero>> = getSuperHeroes().groupBy { it.publisher }
+    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 18.dp)) {
+        superhero.forEach{ (publisher, mySperHero) ->
+            stickyHeader {
+                Text(
+                    text = publisher,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Blue), fontSize = 16.sp, color = Color.White)
+            }
+            items(mySperHero) { superhero ->
+                ItemHero(superhero = superhero) {
+                    Toast.makeText(context, it.realName, Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -163,7 +232,7 @@ fun ItemHero(superhero: SuperHero, onItemSelected: (SuperHero) -> Unit) {
     Card(
         border = BorderStroke(2.dp, Color.Red),
         modifier = Modifier
-            // .width(200.dp)
+            .fillMaxWidth()
             .clickable { onItemSelected(superhero) }) {
         Column {
             Image(
@@ -182,7 +251,7 @@ fun ItemHero(superhero: SuperHero, onItemSelected: (SuperHero) -> Unit) {
                 fontSize = 12.sp
             )
             Text(
-                text = superhero.publicher,
+                text = superhero.publisher,
                 fontSize = 10.sp,
                 modifier = Modifier
                     .align(Alignment.End)
