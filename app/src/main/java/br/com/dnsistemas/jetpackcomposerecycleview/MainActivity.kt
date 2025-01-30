@@ -1,6 +1,5 @@
 package br.com.dnsistemas.jetpackcomposerecycleview
 
-import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -13,10 +12,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,16 +24,22 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -47,6 +50,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,9 +59,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import br.com.dnsistemas.jetpackcomposerecycleview.model.NavigationItem
 import br.com.dnsistemas.jetpackcomposerecycleview.model.SuperHero
+import br.com.dnsistemas.jetpackcomposerecycleview.pages.HomePage
+import br.com.dnsistemas.jetpackcomposerecycleview.pages.NotificationPage
+import br.com.dnsistemas.jetpackcomposerecycleview.pages.SettiingPage
 import br.com.dnsistemas.jetpackcomposerecycleview.ui.theme.JetpackComposeRecycleViewTheme
 import kotlinx.coroutines.launch
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,24 +74,90 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             JetpackComposeRecycleViewTheme {
-                //val scaffoldState = rememberScaffoldState()
                 val snackbarHostState = remember { SnackbarHostState() }
                 val coroutineScope = rememberCoroutineScope()
+                var selectedIndex by remember { mutableStateOf(0) }
+                val navItemList = listOf(
+                    NavigationItem("Home", Icons.Default.Home, Icons.Default.Home, 0),
+                    NavigationItem("Notification", Icons.Default.Home, Icons.Default.Notifications, 5),
+                    NavigationItem("Settings", Icons.Default.Home, Icons.Default.Settings, 0)
+                )
                 Scaffold(
                     topBar = {
                         MyTopAppBar{ message ->
                             coroutineScope.launch {
-                                Log.i("TAG", "onCreate: Pressionado")
                                 snackbarHostState.showSnackbar(message)
-                            } } },
-                    modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    //SimpleRecycleView(innerPadding)
-                    //SuperHeroView(innerPadding)
-                    //SuperHeroGridView(innerPadding)
-                    //SuperHeroWithSpecialControlView(innerPadding)
-                    SuperHeroStickyView(innerPadding)
+                            }
+                        }
+                    },
+                    snackbarHost = { SnackbarHost(snackbarHostState) },
+                    bottomBar = {
+                        NavigationBar {
+                        navItemList.forEachIndexed { index, navItem ->
+                            NavigationBarItem(
+                                selected = selectedIndex == index,
+                                onClick = { selectedIndex = index },
+                                label = { Text(text = navItem.title) },
+                                icon = {
+                                    BadgedBox(badge = {
+                                        if(navItem.badgeCount > 0)
+                                            Badge(){
+                                                Text(text = navItem.badgeCount.toString())
+                                            }
+                                    }) {
+                                        Icon(
+                                            imageVector = if (index == 0) navItem.selectedIcon else navItem.unselectedIcon,
+                                            contentDescription = navItem.title
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                    } }
+                ) { innerPadding ->
+                    //SuperHeroStickyView(innerPadding)
+                    ContentScreen(modifier = Modifier.padding(innerPadding), selectedIndex)
                 }
             }
+        }
+    }
+}
+
+
+@Composable
+fun MyBottomNavigation() {
+    val navItemList = listOf(
+        NavigationItem("Home", Icons.Default.Home, Icons.Default.Home, 0),
+        NavigationItem("Notification", Icons.Default.Home, Icons.Default.Notifications, 5),
+        NavigationItem("Settings", Icons.Default.Home, Icons.Default.Settings, 0)
+    )
+
+    var selectedIndex by remember { mutableStateOf(0) }
+    NavigationBar {
+        navItemList.forEachIndexed { index, navItem ->
+            NavigationBarItem(
+                selected = selectedIndex == index,
+                onClick = { selectedIndex = index },
+                label = { Text(text = navItem.title) },
+                icon = {
+                    Icon(
+                        imageVector = if (index == 0) navItem.selectedIcon else navItem.unselectedIcon,
+                        contentDescription = navItem.title
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int) {
+    when (selectedIndex) {
+        0 -> HomePage()
+        1 -> NotificationPage()
+        2 -> SettiingPage()
+        else -> {
+            HomePage()
         }
     }
 }
@@ -116,14 +191,9 @@ fun MyTopAppBar(onClickIcon: (String) -> Unit) {
     )
 }
 
-@Composable
-fun MySnackBar() {
-
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SuperHeroStickyView(innerPadding: PaddingValues) {
+fun SuperHeroStickyView() {
     val context = LocalContext.current
     val superhero: Map<String, List<SuperHero>> = getSuperHeroes().groupBy { it.publisher }
     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 18.dp)) {
