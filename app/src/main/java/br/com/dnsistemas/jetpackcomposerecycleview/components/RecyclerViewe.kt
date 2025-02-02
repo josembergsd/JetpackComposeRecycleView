@@ -103,11 +103,11 @@ fun SuperHeroWithSpecialControlView(innerPadding: PaddingValues) {
 }
 
 @Composable
-fun SuperHeroGridView(innerPadding: PaddingValues) {
+fun SuperHeroGridView() {
     val context = LocalContext.current
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        modifier = Modifier.padding(innerPadding),
+        modifier = Modifier.padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         content = {
             items(getSuperHeroes()) { superhero ->
@@ -121,7 +121,7 @@ fun SuperHeroGridView(innerPadding: PaddingValues) {
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     )
     LazyColumn(
-        modifier = Modifier.padding(innerPadding),
+        modifier = Modifier.padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 

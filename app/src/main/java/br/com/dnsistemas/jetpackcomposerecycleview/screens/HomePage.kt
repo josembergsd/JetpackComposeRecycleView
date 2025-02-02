@@ -1,31 +1,24 @@
-package br.com.dnsistemas.jetpackcomposerecycleview.pages
+package br.com.dnsistemas.jetpackcomposerecycleview.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
+import br.com.dnsistemas.jetpackcomposerecycleview.components.SuperHeroStickyView
 
 @Composable
-fun NotificationPage(modifier: Modifier = Modifier) {
+fun HomePage(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background((Color(0xCDDC39FF))),
+            .background((Color(0XFF1976D2))),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Notification Page",
-            fontSize = 40.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = Color.White
-        )
+    )  {
+        SuperHeroStickyView()
     }
 }
