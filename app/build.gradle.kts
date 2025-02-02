@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.storage)
     implementation(libs.androidx.recyclerview)
     implementation(libs.material.icons.extended)
+    implementation(libs.navigation.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
