@@ -30,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -171,5 +172,12 @@ fun MyScreenWithDrawer(navController: NavHostController) {
 }
 
 
-
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    JetpackComposeRecycleViewTheme  {
+        val navController = rememberNavController()
+        MyScreenWithDrawer(navController)
+    }
+}
 
